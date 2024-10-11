@@ -5,23 +5,26 @@
     dest: "/tmp/go{{ go_version }}.linux-amd64.tar.gz"
 
 - name: Remove existing Go installation
+  become: true
   ansible.builtin.file:
     path: "/usr/local/go"
     state: absent
 
 - name: Extract Golang to /usr/local
+  become: true  # Ensure elevated privileges
   ansible.builtin.unarchive:
     src: "/tmp/go{{ go_version }}.linux-amd64.tar.gz"
     dest: "/usr/local"
     remote_src: yes
 
 - name: Remove Go tarball
+  become: true  # Ensure elevated privileges
   ansible.builtin.file:
     path: "/tmp/go{{ go_version }}.linux-amd64.tar.gz"
     state: absent
 
 - name: Create .bash_profile if it does not exist for the remote user
-  become: yes
+  become: true
   become_user: "{{ ansible_ssh_user | default(ansible_env.USER) }}"  # Use ansible_ssh_user or fallback to system user
   ansible.builtin.file:
     path: "/home/{{ ansible_ssh_user | default(ansible_env.USER) }}/.bash_profile"
@@ -29,7 +32,7 @@
     mode: '0644'
 
 - name: Ensure Go binary path is in the remote user's .bash_profile
-  become: yes
+  become: true
   become_user: "{{ ansible_ssh_user | default(ansible_env.USER) }}"  # Use ansible_ssh_user or fallback to system user
   ansible.builtin.lineinfile:
     dest: "/home/{{ ansible_ssh_user | default(ansible_env.USER) }}/.bash_profile"
@@ -37,7 +40,7 @@
     state: present
 
 - name: Source .bash_profile and check Go version
-  become: yes
+  become: true
   become_user: "{{ ansible_ssh_user | default(ansible_env.USER) }}"  # Use ansible_ssh_user or fallback to system user
   shell: |
     source /home/{{ ansible_ssh_user | default(ansible_env.USER) }}/.bash_profile

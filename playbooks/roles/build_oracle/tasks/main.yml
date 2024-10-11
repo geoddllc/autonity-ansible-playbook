@@ -1,0 +1,63 @@
+---
+# tasks file for autonity-oracle role
+
+- name: Ensure Go is installed
+  apt:
+    name: golang-go
+    state: present
+  become: true  # Install Go as root
+
+- name: Set Go environment variables
+  shell: |
+    echo 'export GOPATH=$HOME/go' >> $HOME/.bashrc
+    echo 'export PATH=$PATH:/usr/local/go/bin:$GOPATH/bin' >> $HOME/.bashrc
+  args:
+    executable: /bin/bash
+
+- name: Source the bashrc to load Go environment
+  shell: source $HOME/.bashrc
+  args:
+    executable: /bin/bash
+
+- name: Clone Oracle repository
+  git:
+    repo: https://github.com/autonity/autonity-oracle.git
+    dest: "{{ ansible_env.HOME }}/autonity-oracle"  # Correct directory path
+    version: "tags/{{ oracle_version }}"
+  become: false
+  environment:
+    HOME: "{{ ansible_env.HOME }}"
+
+- name: Check if branch {{ oracle_version }} exists
+  command: git branch --list {{ oracle_version }}
+  args:
+    chdir: "{{ ansible_env.HOME }}/autonity-oracle"
+  register: branch_check
+  ignore_errors: true
+
+- name: Check out release tag {{ oracle_version }}
+  command: git checkout tags/{{ oracle_version }} -b {{ oracle_version }}
+  args:
+    chdir: "{{ ansible_env.HOME }}/autonity-oracle"
+  when: branch_check.stdout == ''
+  register: checkout_result
+
+- name: Build Oracle
+  command: make autoracle
+  args:
+    chdir: "{{ ansible_env.HOME }}/autonity-oracle"
+  when: checkout_result.changed or branch_check.stdout != ''
+  register: build_result
+
+- name: Verify Oracle binary exists after build
+  stat:
+    path: "{{ ansible_env.HOME }}/autonity-oracle/build/bin/autoracle"
+  register: autonity_binary
+
+- name: Copy Oracle binary to /usr/local/bin
+  copy:
+    src: "{{ ansible_env.HOME }}/autonity-oracle/build/bin/autoracle"
+    dest: /usr/local/bin/autoracle
+    mode: '0755'
+    remote_src: true
+  become: true

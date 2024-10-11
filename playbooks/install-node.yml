@@ -4,35 +4,42 @@
   vars:
     go_version: "1.21.0"
     autonity_version: "v0.14.1"
+    external_ipv4_address: "203.189.67.106"
+    chain: "piccadilly"
   tasks:
-    # - name: Update and upgrade apt packages
-    #   apt:
-    #     update_cache: yes
-    #     upgrade: dist
-    #     force_apt_get: yes
+    - name: Update and upgrade apt packages
+      apt:
+        update_cache: yes
+        upgrade: dist
+        force_apt_get: yes
 
-    # - name: Install required system packages
-    #   apt:
-    #     name:
-    #       - curl
-    #       - git
-    #       - wget
-    #       - htop
-    #       - tmux
-    #       - build-essential
-    #       - jq
-    #       - make
-    #       - gcc
-    #       - tar
-    #       - clang
-    #       - pkg-config
-    #       - libssl-dev
-    #       - ncdu
-    #     state: present
-    # - name: Install Go Lang
-    #   include_role:
-    #     name: install_go
+    - name: Install required system packages
+      apt:
+        name:
+          - curl
+          - git
+          - wget
+          - htop
+          - tmux
+          - build-essential
+          - jq
+          - make
+          - gcc
+          - tar
+          - clang
+          - pkg-config
+          - libssl-dev
+          - ncdu
+        state: present
+      become: true
+    - name: Install Go Lang
+      include_role:
+        name: install_go
 
     - name: Install Autonity
       include_role:
         name: build_autonity
+
+    - name: Create SystemD
+      include_role:
+        name: systemd

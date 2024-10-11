@@ -1,0 +1,24 @@
+[Unit]
+Description=Autonity Service
+After=network.target
+
+[Service]
+User=ubuntu
+ExecStart=/usr/local/bin/autonity \
+    --datadir /home/ubuntu/autonity-chaindata \
+    --{{ chain }}  \
+    --http \
+    --http.addr 0.0.0.0 \
+    --http.api aut,eth,net,txpool,web3,admin \
+    --http.vhosts "*" \
+    --ws \
+    --ws.addr 0.0.0.0 \
+    --ws.api aut,eth,net,txpool,web3,admin \
+    --nat extip:{{ external_ipv4_address }}
+Restart=on-failure
+LimitNOFILE=1024
+# Ensure the node has time to exit safely
+TimeoutStopSec=180  # Wait up to 3 minutes for graceful shutdown
+KillSignal=SIGTERM  # Use SIGTERM to allow graceful exit
+[Install]
+WantedBy=multi-user.target

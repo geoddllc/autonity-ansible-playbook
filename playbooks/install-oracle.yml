@@ -1,0 +1,41 @@
+---
+- name: Install and configure Autonity Node
+  hosts: oracle
+  vars:
+    go_version: "1.21.0"
+    oracle_version: "v0.1.9"
+    external_ipv4_address: "203.189.67.107"
+    chain: "piccadilly"
+  tasks:
+    # - name: Update and upgrade apt packages
+    #   apt:
+    #     update_cache: yes
+    #     upgrade: dist
+    #     force_apt_get: yes
+    #   become: yes
+    # - name: Install required system packages
+    #   apt:
+    #     name:
+    #       - curl
+    #       - git
+    #       - wget
+    #       - htop
+    #       - tmux
+    #       - build-essential
+    #       - jq
+    #       - make
+    #       - gcc
+    #       - tar
+    #       - clang
+    #       - pkg-config
+    #       - libssl-dev
+    #       - ncdu
+    #     state: present
+    #   become: yes
+    # - name: Install Go Lang
+    #   include_role:
+    #     name: install_go
+
+    - name: Install Oracle
+      include_role:
+        name: build_oracle

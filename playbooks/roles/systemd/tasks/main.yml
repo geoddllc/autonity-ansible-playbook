@@ -1,0 +1,27 @@
+---
+# tasks file for autonity_systemd role
+
+- name: Create Autonity working directory
+  file:
+    path: /home/ubuntu/autonity-chaindata
+    state: directory
+    mode: '0755'
+  become: true
+
+- name: Create systemd service file for Autonity
+  template:
+    src: autonity.service.j2
+    dest: /etc/systemd/system/autonity.service
+    mode: '0644'
+  become: true
+
+- name: Reload systemd daemon
+  command: systemctl daemon-reload
+  become: true
+
+- name: Enable and start Autonity service
+  systemd:
+    name: autonity
+    enabled: true
+    state: started
+  become: true
